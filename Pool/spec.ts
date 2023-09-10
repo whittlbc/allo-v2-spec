@@ -1,4 +1,5 @@
-import { LiveObject, Spec, Property, Event, OnEvent, BigInt, Address, Json, Timestamp } from '@spec.dev/core'
+import { Spec, LiveTable, Property, Event, OnEvent, BigInt, Address, Json, Timestamp, BeforeAll } from '@spec.dev/core'
+import { generatePoolRoleIds } from '../shared/roles.ts'
 
 /**
  * All Pools created on Allo
@@ -6,67 +7,77 @@ import { LiveObject, Spec, Property, Event, OnEvent, BigInt, Address, Json, Time
 @Spec({ 
     uniqueBy: ['poolId', 'chainId'] 
 })
-class Pool extends LiveObject {
-    // TODO
+class Pool extends LiveTable {
+
     @Property()
-    poolId: number
+    poolId: string
 
-    // TODO: how do i link this to profileId ?
-
+    @Property()
+    profileId: Address
+    
     @Property()
     strategy: Address
 
     @Property()
     token: Address
 
-    @Property()
+    @Property({ default: 0 })
     amount: BigInt
 
-    @Property()
+    @Property({ default: 0 })
     feePaid: BigInt
 
-    @Property()
+    @Property({ default: 0 })
     baseFeePaid: BigInt
 
     @Property()
     metadata: Json
 
     @Property()
-    createdAt: Timestamp
+    managerRoleId: string
 
     @Property()
-    updatedAt: Timestamp
+    adminRoleId: string
+
+    @Property()
+    createdAt: Timestamp
 
     // ==== Event Handlers ===================
 
+    @BeforeAll()
+    setCommonProperties(event: Event) {
+        this.poolId = event.data.poolId.toString()
+    }
+
     @OnEvent('allov2.Allo.PoolCreated')
     onPoolCreated(event: Event) {
-        this.poolId = event.data.poolId
+        this.profileId = event.data.profileId
         this.strategy = event.data.strategy
         this.token = event.data.token
-        // TODO: how to link to Profile.profileId
+        this.amount = BigInt.from(event.data.amount)
         this.metadata = event.data.metadata
-
+        const [managerRoleId, adminRoleId] = generatePoolRoleIds(this.poolId)
+        this.managerRoleId = managerRoleId
+        this.adminRoleId = adminRoleId
         this.createdAt = this.blockTimestamp
-        this.updatedAt = this.blockTimestamp
     }
 
     @OnEvent('allov2.Allo.PoolMetadataUpdated')
     onPoolMetadataUpdated(event: Event) {
         this.metadata = event.data.metadata
-
-        this.updatedAt = this.blockTimestamp
     }
 
     @OnEvent('allov2.Allo.PoolFunded')
-    onPoolFunded(event: Event) {
-        this.amount += event.data.amount
-        this.feePaid += event.data.feePaid
+    async onPoolFunded(event: Event) {
+        await this.load()
+        this.amount = this.amount.plus(event.data.amount)
+        this.feePaid = this.feePaid.plus(event.data.fee)
     }
 
     @OnEvent('allov2.Allo.BaseFeePaid')
-    onBaseFeePaid(event: Event) {
-        this.baseFeePaid += event.data.baseFeePaid
+    async onBaseFeePaid(event: Event) {
+        await this.load()
+        this.baseFeePaid = this.baseFeePaid.plus(event.data.amount)
     }
 }
 

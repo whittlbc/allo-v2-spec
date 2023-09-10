@@ -1,4 +1,4 @@
-import { LiveObject, Spec, Property, Event, OnEvent, Address, BigInt, Json, Timestamp } from '@spec.dev/core'
+import { Spec, LiveTable, Property, Event, OnEvent, Address, Json, BigInt, Timestamp, BeforeAll, resolveMetadata } from '@spec.dev/core'
 
 /**
  * All Profiles created on Registry
@@ -6,15 +6,13 @@ import { LiveObject, Spec, Property, Event, OnEvent, Address, BigInt, Json, Time
 @Spec({ 
     uniqueBy: ['profileId', 'chainId'] 
 })
-class Profile extends LiveObject {
+class Profile extends LiveTable {
     
     @Property()
     profileId: Address
 
-    // TODO: int256
-    // TODO: what are the supported datatypes?
     @Property()
-    nonce: number
+    nonce: BigInt
 
     @Property()
     name: string
@@ -31,58 +29,48 @@ class Profile extends LiveObject {
     @Property()
     createdAt: Timestamp
 
-    @Property()
-    updatedAt: Timestamp
-
-    // TODO: would this be a new object Account, new object Role and then create a join  of sorts?
-    // Reference : https://github.com/allo-protocol/allo-v2-graph/blob/main/schema.graphql
-    @Property()
-    members: Address[]
-    
-
     // ==== Event Handlers ===================
 
-    @OnEvent('allov2.Profile.ProfileCreated')
-    onSomeEvent(event: Event) {
+    @BeforeAll()
+    setCommonProperties(event: Event) {
         this.profileId = event.data.profileId
-        this.nonce = event.data.nonce
-    
+    }
+
+    @OnEvent('allov2.Registry.ProfileCreated')
+    async onProfileCreated(event: Event) {
+        this.nonce = BigInt.from(event.data.nonce)
         this.name = event.data.name
         this.metadata = event.data.metadata
-        // TODO: i can use resolveMetadata to fetch the metadata to add more information ?
-        // Do i pass the ipfs pinning service ?
+        await this._resolveFullMetadata()
         this.owner = event.data.owner
         this.anchor = event.data.anchor
-
         this.createdAt = this.blockTimestamp
-        this.updatedAt = this.blockTimestamp
     }
 
-    @OnEvent('allov2.Profile.ProfileNameUpdated')
+    @OnEvent('allov2.Registry.ProfileNameUpdated')
     onProfileNameUpdated(event: Event) {
-
         this.name = event.data.name
         this.anchor = event.data.anchor
-
-        this.updatedAt = this.blockTimestamp
     }
 
-    @OnEvent('allov2.Profile.ProfileMetadataUpdated')
-    onProfileMetadataUpdated(event: Event) { 
-
+    @OnEvent('allov2.Registry.ProfileMetadataUpdated')
+    async onProfileMetadataUpdated(event: Event) { 
         this.metadata = event.data.metadata
-        this.updatedAt = this.blockTimestamp
+        await this._resolveFullMetadata()
     }
 
-    @OnEvent('allov2.Profile.ProfileOwnerUpdated')
+    @OnEvent('allov2.Registry.ProfileOwnerUpdated')
     onProfileOwnerUpdated(event: Event) {
         this.owner = event.data.owner
-
-        this.updatedAt = this.blockTimestamp
     }
 
-    // _revokeRole
-    // _grantRole
+    // ==== Helpers ===================
+
+    async _resolveFullMetadata() {
+        const [protocolId, pointer] = this.metadata as string[]
+        const fullMetadata = await resolveMetadata(pointer, { protocolId })
+        // TODO: do something with the full metadata.        
+    }
 }
 
 export default Profile

@@ -1,0 +1,10 @@
+{
+    "namespace": "allo",
+    "name": "RoleAccount",
+    "version": "0.0.1",
+    "displayName": "Allo Role Accounts",
+    "description": "The accounts associated with an Allo role",
+    "chains": [
+        5
+    ]
+}

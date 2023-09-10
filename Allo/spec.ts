@@ -1,4 +1,4 @@
-import { LiveObject, Spec, Property, Event, OnEvent, Address, Timestamp } from '@spec.dev/core'
+import { Spec, LiveTable, Property, Event, OnEvent, Address, BigInt } from '@spec.dev/core'
 
 /**
  * Global data
@@ -6,7 +6,7 @@ import { LiveObject, Spec, Property, Event, OnEvent, Address, Timestamp } from '
 @Spec({ 
     uniqueBy: ['chainId'] 
 })
-class Allo extends LiveObject {
+class Allo extends LiveTable {
     
     @Property()
     registry: Address
@@ -20,51 +20,44 @@ class Allo extends LiveObject {
     @Property()
     treasury: Address
 
-    // TODO: ask what the best way to do this. create a new object ?
     @Property()
     cloneableStrategies: Address[]
 
-    @Property()
-    updatedAt: Timestamp
-
     // ==== Event Handlers ===================
-
+ 
     @OnEvent('allov2.Allo.RegistryUpdated')
     onSomeEvent(event: Event) {
         this.registry = event.data.registry
-        this.updatedAt = this.blockTimestamp
     }
 
     @OnEvent('allov2.Allo.FeePercentageUpdated')
     onFeePercentageUpdated(event: Event) {
-        this.feePercentage = event.data.feePercentage
-        this.updatedAt = this.blockTimestamp
+        this.feePercentage = BigInt.from(event.data.feePercentage)
     }
 
     @OnEvent('allov2.Allo.BaseFeeUpdated')
     onBaseFeeUpdated(event: Event) {
-        this.baseFee = event.data.baseFee
-        this.updatedAt = this.blockTimestamp
+        this.baseFee = BigInt.from(event.data.baseFee)
     }
 
     @OnEvent('allov2.Allo.TreasuryUpdated')
     onTreasuryUpdated(event: Event) {
         this.treasury = event.data.treasury
-        this.updatedAt = this.blockTimestamp
     }
 
-    // TODO: would strategies have to be another object
-    // @OnEvent('allov2.Allo.StrategyApproved')
-    // onStrategyApproved(event: Event) {
-    //     this.cloneableStrategies.push(event.data.strategy)
-    //     this.updatedAt = this.blockTimestamp
-    // }
+    @OnEvent('allov2.Allo.StrategyApproved')
+    async onStrategyApproved(event: Event) {
+        await this.load()
+        this.cloneableStrategies.push(event.data.strategy)
+    }
 
-    // @OnEvent('allov2.Allo.StrategyRemoved')
-    // onStrategyRemoved(event: Event) {
-    //     this.cloneableStrategies = this.cloneableStrategies.filter((strategy) => strategy !== event.data.strategy)
-    //     this.updatedAt = this.blockTimestamp
-    // }
+    @OnEvent('allov2.Allo.StrategyRemoved')
+    async onStrategyRemoved(event: Event) {
+        await this.load()
+        this.cloneableStrategies = this.cloneableStrategies.filter(strategy => (
+            strategy !== event.data.strategy
+        ))
+    }
 }
 
 export default Allo
