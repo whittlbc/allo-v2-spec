@@ -1,4 +1,4 @@
-import { Spec, LiveTable, Property, Event, OnEvent, Address, BigInt } from '@spec.dev/core'
+import { Spec, LiveObject, Property, Event, OnEvent, Address, BigInt } from '@spec.dev/core'
 
 /**
  * Global data
@@ -6,7 +6,7 @@ import { Spec, LiveTable, Property, Event, OnEvent, Address, BigInt } from '@spe
 @Spec({ 
     uniqueBy: ['chainId'] 
 })
-class Allo extends LiveTable {
+class Allo extends LiveObject {
     
     @Property()
     registry: Address

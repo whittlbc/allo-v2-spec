@@ -1,4 +1,4 @@
-import { Spec, LiveTable, Property, Event, OnEvent, Address } from '@spec.dev/core'
+import { Spec, LiveObject, Property, Event, OnEvent, Address } from '@spec.dev/core'
 
 /**
  * All accounts on Allo V2.
@@ -6,7 +6,7 @@ import { Spec, LiveTable, Property, Event, OnEvent, Address } from '@spec.dev/co
 @Spec({ 
     uniqueBy: ['accountId', 'chainId'] 
 })
-class Account extends LiveTable {
+class Account extends LiveObject {
 
     @Property()
     accountId: Address

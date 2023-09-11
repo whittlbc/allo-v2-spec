@@ -1,4 +1,4 @@
-import { Spec, LiveTable, Property, Event, OnEvent, Address, Json, BigInt, Timestamp, BeforeAll, resolveMetadata } from '@spec.dev/core'
+import { Spec, LiveObject, Property, Event, OnEvent, Address, Json, BigInt, Timestamp, BeforeAll, resolveMetadata } from '@spec.dev/core'
 
 /**
  * All Profiles created on Registry
@@ -6,7 +6,7 @@ import { Spec, LiveTable, Property, Event, OnEvent, Address, Json, BigInt, Times
 @Spec({ 
     uniqueBy: ['profileId', 'chainId'] 
 })
-class Profile extends LiveTable {
+class Profile extends LiveObject {
     
     @Property()
     profileId: Address
