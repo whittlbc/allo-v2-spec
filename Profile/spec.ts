@@ -49,7 +49,7 @@ class Profile extends LiveObject {
         this.anchor = event.data.anchor
         this.createdAt = this.blockTimestamp
 
-        // Create account for profile owner & role for profile members.
+        // Create an account for the profile owner and a role for profile members.
         const ownerAccount = this.new(Account, { accountId: this.owner })
         const memberRole = this.new(Role, { roleId: this.profileId })
 
