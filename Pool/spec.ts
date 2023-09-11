@@ -1,5 +1,6 @@
-import { Spec, LiveObject, Property, Event, OnEvent, BigInt, Address, Timestamp, BeforeAll } from '@spec.dev/core'
+import { Spec, LiveObject, Property, Event, OnEvent, BigInt, Address, Timestamp, BeforeAll, saveAll } from '@spec.dev/core'
 import { generatePoolRoleIds } from '../shared/roles.ts'
+import Role from '../Role/spec.ts'
 
 /**
  * All Pools created on Allo
@@ -50,7 +51,8 @@ class Pool extends LiveObject {
     }
 
     @OnEvent('allov2.Allo.PoolCreated')
-    onPoolCreated(event: Event) {
+    async onPoolCreated(event: Event) {
+        // Set pool data.
         this.profileId = event.data.profileId
         this.strategy = event.data.strategy
         this.token = event.data.token
@@ -60,6 +62,13 @@ class Pool extends LiveObject {
         this.managerRoleId = managerRoleId
         this.adminRoleId = adminRoleId
         this.createdAt = this.blockTimestamp
+
+        // Create manager and admin roles for the pool.
+        const managerRole = this.new(Role, { roleId: this.managerRoleId })
+        const adminRole = this.new(Role, { roleId: this.adminRoleId })
+
+        // Save all in a single tx.
+        await saveAll(this, managerRole, adminRole)
     }
 
     @OnEvent('allov2.Allo.PoolMetadataUpdated')

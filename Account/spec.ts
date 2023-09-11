@@ -1,4 +1,4 @@
-import { Spec, LiveObject, Property, Event, OnEvent, Address } from '@spec.dev/core'
+import { Spec, LiveObject, Property, Address } from '@spec.dev/core'
 
 /**
  * All accounts on Allo V2.
@@ -10,21 +10,6 @@ class Account extends LiveObject {
 
     @Property()
     accountId: Address
-
-    // ==== Event Handlers ===================
-    
-    @OnEvent('allov2.Registry.ProfileCreated')
-    createForProfileOwner(event: Event) {
-        this.accountId = event.data.owner
-    }
-
-    @OnEvent('allov2.Allo.RoleGranted')
-    @OnEvent('allov2.Allo.RoleRevoked')
-    @OnEvent('allov2.Registry.RoleRevoked')
-    @OnEvent('allov2.Registry.RoleGranted')
-    createForRole(event: Event) {
-        this.accountId = event.data.account
-    }    
 }
 
 export default Account
