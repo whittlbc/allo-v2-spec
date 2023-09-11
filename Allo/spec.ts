@@ -63,12 +63,12 @@ class Allo extends LiveObject {
     }
 
     @OnEvent('allov2.Allo.RoleGranted', { autoSave: false })
-    async onRoleGranted(event: Event,) {
+    async onRoleGranted(event: Event) {
         await this._upsertRoleAccount(event, true)
     }
 
     @OnEvent('allov2.Allo.RoleRevoked', { autoSave: false })
-    async onRoleRevoked(event: Event,) {
+    async onRoleRevoked(event: Event) {
         await this._upsertRoleAccount(event, false)
     }
 

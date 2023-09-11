@@ -41,7 +41,6 @@ class Profile extends LiveObject {
 
     @OnEvent('allov2.Registry.ProfileCreated', { autoSave: false })
     async onProfileCreated(event: Event) {
-        // Set profile data.
         this.nonce = BigInt.from(event.data.nonce)
         this.name = event.data.name
         this.metadata = event.data.metadata
@@ -50,14 +49,12 @@ class Profile extends LiveObject {
         this.anchor = event.data.anchor
         this.createdAt = this.blockTimestamp
 
-        // Create account for profile owner.
-        const account = this.new(Account, { accountId: this.owner })
-
-        // Create role to house profile members.
-        const role = this.new(Role, { roleId: this.profileId })
+        // Create account for profile owner & role for profile members.
+        const ownerAccount = this.new(Account, { accountId: this.owner })
+        const memberRole = this.new(Role, { roleId: this.profileId })
 
         // Save all in a single tx.
-        await saveAll(this, account, role)
+        await saveAll(this, ownerAccount, memberRole)
     }
 
     @OnEvent('allov2.Registry.ProfileNameUpdated')
@@ -78,12 +75,12 @@ class Profile extends LiveObject {
     }
 
     @OnEvent('allov2.Registry.RoleGranted', { autoSave: false })
-    async onRoleGranted(event: Event,) {
+    async onRoleGranted(event: Event) {
         await this._upsertRoleAccount(event, true)
     }
 
     @OnEvent('allov2.Registry.RoleRevoked', { autoSave: false })
-    async onRoleRevoked(event: Event,) {
+    async onRoleRevoked(event: Event) {
         await this._upsertRoleAccount(event, false)
     }
 

@@ -50,9 +50,8 @@ class Pool extends LiveObject {
         this.poolId = event.data.poolId.toString()
     }
 
-    @OnEvent('allov2.Allo.PoolCreated')
+    @OnEvent('allov2.Allo.PoolCreated', { autoSave: false })
     async onPoolCreated(event: Event) {
-        // Set pool data.
         this.profileId = event.data.profileId
         this.strategy = event.data.strategy
         this.token = event.data.token
