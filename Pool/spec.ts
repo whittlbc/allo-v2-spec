@@ -1,4 +1,4 @@
-import { Spec, LiveObject, Property, Event, OnEvent, BigInt, Address, Json, Timestamp, BeforeAll } from '@spec.dev/core'
+import { Spec, LiveObject, Property, Event, OnEvent, BigInt, Address, Timestamp, BeforeAll } from '@spec.dev/core'
 import { generatePoolRoleIds } from '../shared/roles.ts'
 
 /**
@@ -31,7 +31,7 @@ class Pool extends LiveObject {
     baseFeePaid: BigInt
 
     @Property()
-    metadata: Json
+    metadata: string[]
 
     @Property()
     managerRoleId: string

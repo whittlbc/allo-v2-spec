@@ -1,4 +1,4 @@
-import { Spec, LiveObject, Property, Event, OnEvent, Address, Json, BigInt, Timestamp, BeforeAll, resolveMetadata } from '@spec.dev/core'
+import { Spec, LiveObject, Property, Event, OnEvent, Address, BigInt, Timestamp, BeforeAll, resolveMetadata } from '@spec.dev/core'
 
 /**
  * All Profiles created on Registry
@@ -18,7 +18,7 @@ class Profile extends LiveObject {
     name: string
 
     @Property()
-    metadata: Json
+    metadata: string[]
 
     @Property()
     owner: Address  
@@ -67,7 +67,7 @@ class Profile extends LiveObject {
     // ==== Helpers ===================
 
     async _resolveFullMetadata() {
-        const [protocolId, pointer] = this.metadata as string[]
+        const [protocolId, pointer] = this.metadata
         const fullMetadata = await resolveMetadata(pointer, { protocolId })
         // TODO: do something with the full metadata.        
     }
